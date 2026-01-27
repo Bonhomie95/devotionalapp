@@ -1,17 +1,21 @@
-import { ADMOB_BANNER_ID, ADMOB_INTERSTITIAL_ID } from '@env';
 import mobileAds, {
-    BannerAd,
-    BannerAdSize,
-    InterstitialAd,
-    TestIds,
+  BannerAd,
+  BannerAdSize,
+  InterstitialAd,
+  TestIds,
 } from 'react-native-google-mobile-ads';
 
 mobileAds().initialize();
 
-export const bannerUnitId = __DEV__ ? TestIds.BANNER : ADMOB_BANNER_ID;
+// Always return string
+export const bannerUnitId: string = __DEV__
+  ? TestIds.BANNER
+  : process.env.ADMOB_BANNER_ID || TestIds.BANNER;
 
 const interstitial = InterstitialAd.createForAdRequest(
-  __DEV__ ? TestIds.INTERSTITIAL : ADMOB_INTERSTITIAL_ID,
+  __DEV__
+    ? TestIds.INTERSTITIAL
+    : process.env.ADMOB_INTERSTITIAL_ID || TestIds.INTERSTITIAL,
   { requestNonPersonalizedAdsOnly: true },
 );
 

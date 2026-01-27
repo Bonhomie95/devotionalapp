@@ -29,7 +29,7 @@ export default function VerseBox({
       <TouchableOpacity style={styles.bookmark} onPress={toggleBookmark}>
         <Ionicons
           name={saved ? 'bookmark' : 'bookmark-outline'}
-          size={26}
+          size={32}
           color={COLORS.primary}
         />
       </TouchableOpacity>
@@ -47,11 +47,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginVertical: 15,
   },
-  verse: { color: COLORS.text, fontSize: 18, textAlign: 'center' },
+  verse: {
+    color: COLORS.text,
+    fontSize: 18,
+    textAlign: 'center',
+    paddingHorizontal: 15,
+  },
   ref: { color: COLORS.primary, marginTop: 8, textAlign: 'center' },
   bookmark: {
     position: 'absolute',
-    right: 15,
-    top: 15,
+    right: 10,
+    top: 10,
   },
 });

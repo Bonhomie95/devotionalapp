@@ -2,7 +2,10 @@ import * as Notifications from 'expo-notifications';
 import { getRandomDevotion } from './useRandomDevotion';
 
 export const scheduleDailyDevotions = async () => {
-  await Notifications.requestPermissionsAsync();
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== 'granted') return false;
+
+  await Notifications.cancelAllScheduledNotificationsAsync();
 
   const morning = getRandomDevotion();
   const night = getRandomDevotion();
@@ -15,9 +18,10 @@ export const scheduleDailyDevotions = async () => {
       data: { id: morning.id },
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
       hour: 7,
       minute: 0,
+      repeats: true,
     },
   });
 
@@ -29,9 +33,16 @@ export const scheduleDailyDevotions = async () => {
       data: { id: night.id },
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
       hour: 21,
       minute: 0,
+      repeats: true,
     },
   });
+
+  return true;
+};
+
+export const disableNotifications = async () => {
+  await Notifications.cancelAllScheduledNotificationsAsync();
 };

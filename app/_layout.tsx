@@ -1,3 +1,4 @@
+import { BookmarkProvider } from '@/context/BookmarkContext';
 import { loadInterstitial, showInterstitialIfReady } from '@/hooks/useAds';
 import { useNotificationListener } from '@/hooks/useNotificationListener';
 import * as Notifications from 'expo-notifications';
@@ -27,9 +28,9 @@ export default function Layout() {
   }, []);
   useNotificationListener();
   return (
-    <>
+    <BookmarkProvider>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }} />
-    </>
+    </BookmarkProvider>
   );
 }
