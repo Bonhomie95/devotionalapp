@@ -3,6 +3,7 @@ import DevotionCard from '@/components/DevotionCard';
 import Header from '@/components/Header';
 import VerseBox from '@/components/VerseBox';
 import { COLORS } from '@/constants/colors';
+import { BannerAd, BannerAdSize, bannerUnitId } from '@/hooks/useAds';
 import { useDevotion } from '@/hooks/useDevotion';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
@@ -28,8 +29,13 @@ export default function Home() {
       </TouchableOpacity>
 
       <ButtonPrimary
-        label="View Bookmarks"
-        onPress={() => router.push('/bookmarks')}
+        label="Settings"
+        onPress={() => router.push('/settings')}
+      />
+
+      <BannerAd
+        unitId={bannerUnitId}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
       />
     </ScrollView>
   );

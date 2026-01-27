@@ -15,10 +15,9 @@ export const scheduleDailyDevotions = async () => {
       data: { id: morning.id },
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour: 7,
       minute: 0,
-      repeats: true,
     },
   });
 
@@ -30,10 +29,9 @@ export const scheduleDailyDevotions = async () => {
       data: { id: night.id },
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour: 21,
       minute: 0,
-      repeats: true,
     },
   });
 };

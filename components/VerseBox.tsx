@@ -1,4 +1,5 @@
 import { COLORS } from '@/constants/colors';
+import { Devotion } from '@/constants/devotions';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,20 +11,25 @@ export default function VerseBox({
 }: {
   verse: string;
   reference: string;
-  devotion: any;
+  devotion: Devotion;
 }) {
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
   const saved = isBookmarked(devotion.id);
 
-  const toggle = () =>
-    saved ? removeBookmark(devotion.id) : addBookmark(devotion);
+  const toggleBookmark = () => {
+    if (saved) {
+      removeBookmark(devotion.id);
+    } else {
+      addBookmark(devotion);
+    }
+  };
 
   return (
     <View style={styles.box}>
-      <TouchableOpacity style={styles.bookmark} onPress={toggle}>
+      <TouchableOpacity style={styles.bookmark} onPress={toggleBookmark}>
         <Ionicons
           name={saved ? 'bookmark' : 'bookmark-outline'}
-          size={24}
+          size={26}
           color={COLORS.primary}
         />
       </TouchableOpacity>
@@ -43,5 +49,9 @@ const styles = StyleSheet.create({
   },
   verse: { color: COLORS.text, fontSize: 18, textAlign: 'center' },
   ref: { color: COLORS.primary, marginTop: 8, textAlign: 'center' },
-  bookmark: { position: 'absolute', right: 15, top: 15 },
+  bookmark: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
+  },
 });

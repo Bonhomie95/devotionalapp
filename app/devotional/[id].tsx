@@ -1,32 +1,56 @@
+import ButtonPrimary from '@/components/ButtonPrimary';
 import DevotionCard from '@/components/DevotionCard';
 import Header from '@/components/Header';
+import ShareVerseCard from '@/components/ShareVerseCard';
 import VerseBox from '@/components/VerseBox';
 import { COLORS } from '@/constants/colors';
 import { DEVOTIONS } from '@/constants/devotions';
-import { useLocalSearchParams } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
-
-import ButtonPrimary from '@/components/ButtonPrimary';
-import * as FileSystem from 'expo-file-system/legacy';
+import {
+  BannerAd,
+  BannerAdSize,
+  bannerUnitId,
+  loadInterstitial,
+  showInterstitialIfReady,
+} from '@/hooks/useAds';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
+import { useEffect, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 
 export default function DevotionDetails() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const devotion = DEVOTIONS.find((d) => d.id === id);
+  const { addBookmark, isBookmarked } = useBookmarks();
+  const shotRef = useRef<ViewShot>(null);
 
-  if (!devotion) {
-    return null;
-  }
+  // Show interstitial
+  useEffect(() => {
+    loadInterstitial();
+    showInterstitialIfReady();
+  }, []);
+
+  // Auto-bookmark
+  useEffect(() => {
+    if (devotion && !isBookmarked(devotion.id)) {
+      addBookmark(devotion);
+    }
+  }, [devotion]);
+
+  if (!devotion) return null;
 
   const shareVerse = async () => {
-    try {
-      const text = `${devotion.verse}\n— ${devotion.reference}`;
-      const fileUri = FileSystem.cacheDirectory + 'verse.txt';
+    if (!shotRef.current) return;
 
-      await FileSystem.writeAsStringAsync(fileUri, text);
-      await Sharing.shareAsync(fileUri);
-    } catch (err) {
-      Alert.alert('Error', 'Unable to share verse');
+    const uri = await captureRef(shotRef, {
+      format: 'png',
+      quality: 1,
+    });
+
+    if (uri) {
+      await Sharing.shareAsync(uri);
     }
   };
 
@@ -42,7 +66,31 @@ export default function DevotionDetails() {
 
       <DevotionCard title={devotion.title} message={devotion.message} />
 
-      <ButtonPrimary label="Share Verse" onPress={shareVerse} />
+      {/* Hidden render for image capture */}
+      <View style={{ position: 'absolute', left: -9999 }}>
+        <ViewShot ref={shotRef}>
+          <ShareVerseCard
+            verse={devotion.verse}
+            reference={devotion.reference}
+          />
+        </ViewShot>
+      </View>
+
+      <ButtonPrimary label="Share as Image" onPress={shareVerse} />
+
+      <ButtonPrimary
+        label="View Bookmarks"
+        onPress={() => router.push('/bookmarks')}
+      />
+      <ButtonPrimary
+        label="Settings"
+        onPress={() => router.push('/settings')}
+      />
+
+      <BannerAd
+        unitId={bannerUnitId}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+      />
     </View>
   );
 }

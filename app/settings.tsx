@@ -19,7 +19,11 @@ export default function Settings() {
 
       <View style={styles.row}>
         <Text style={styles.label}>Daily Reminder</Text>
-        <Switch value={notifications} onValueChange={handleToggle} />
+        {/* <Switch value={notifications} onValueChange={handleToggle} /> */}
+        <View style={styles.row}>
+          <Text style={styles.label}>Daily Devotions</Text>
+          <Switch value={notifications} onValueChange={handleToggle} />
+        </View>
       </View>
     </View>
   );
