@@ -19,7 +19,10 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 
 export default function Home() {
-  const { devotion, timeLeft } = useDevotion();
+  const devotionState = useDevotion();
+  const devotion = devotionState.devotion;
+  const timeLeft = devotionState.timeLeft;
+
   const router = useRouter();
   const shotRef = useRef<ViewShot>(null);
 
@@ -30,12 +33,7 @@ export default function Home() {
 
   const shareVerse = async () => {
     if (!shotRef.current) return;
-
-    const uri = await captureRef(shotRef, {
-      format: 'png',
-      quality: 1,
-    });
-
+    const uri = await captureRef(shotRef, { format: 'png', quality: 1 });
     if (uri) await Sharing.shareAsync(uri);
   };
 
@@ -45,10 +43,6 @@ export default function Home() {
   return (
     <ScrollView style={styles.container}>
       <Header title="Daily Devotion" />
-
-      {/* <Text style={styles.countdown}>
-        New devotion in {hours}h {minutes}m
-      </Text> */}
 
       <VerseBox
         verse={devotion.verse}
@@ -68,12 +62,10 @@ export default function Home() {
       </View>
 
       <ButtonPrimary label="Share as Image" onPress={shareVerse} />
-
       <ButtonPrimary
         label="View Bookmarks"
         onPress={() => router.push('/bookmarks')}
       />
-
       <ButtonPrimary
         label="Settings"
         onPress={() => router.push('/settings')}
