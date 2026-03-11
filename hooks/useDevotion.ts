@@ -1,6 +1,7 @@
 import { DEVOTIONS, Devotion } from '@/constants/devotions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
+import { getNextDailyDevotion } from './useRandomDevotion';
 
 const KEY_DEVOTION = 'TODAY_DEVOTION';
 const KEY_EXPIRY = 'DEVOTION_EXPIRY';
@@ -25,16 +26,15 @@ export const useDevotion = () => {
   };
 
   const initDevotion = async () => {
-    // 🔥 1. If app opened from notification, override devotion
+    // 1. If app was opened from a notification tap, show that devotion
     const override = await AsyncStorage.getItem(KEY_OVERRIDE);
     if (override) {
-      const parsed = JSON.parse(override);
-      setDevotion(parsed);
+      setDevotion(JSON.parse(override));
       await AsyncStorage.removeItem(KEY_OVERRIDE);
       return;
     }
 
-    // 🔥 2. Otherwise load daily locked devotion
+    // 2. Show today's locked devotion if still valid
     const saved = await AsyncStorage.getItem(KEY_DEVOTION);
     const expiry = await AsyncStorage.getItem(KEY_EXPIRY);
     const now = Date.now();
@@ -42,16 +42,18 @@ export const useDevotion = () => {
     if (saved && expiry && now < Number(expiry)) {
       setDevotion(JSON.parse(saved));
       setTimeLeft(Number(expiry) - now);
-    } else {
-      const random = DEVOTIONS[Math.floor(Math.random() * DEVOTIONS.length)];
-      const next24h = now + 24 * 60 * 60 * 1000;
-
-      await AsyncStorage.setItem(KEY_DEVOTION, JSON.stringify(random));
-      await AsyncStorage.setItem(KEY_EXPIRY, String(next24h));
-
-      setDevotion(random);
-      setTimeLeft(24 * 60 * 60 * 1000);
+      return;
     }
+
+    // 3. Pick a fresh devotion from the non-repeating pool
+    const next = await getNextDailyDevotion();
+    const next24h = now + 24 * 60 * 60 * 1000;
+
+    await AsyncStorage.setItem(KEY_DEVOTION, JSON.stringify(next));
+    await AsyncStorage.setItem(KEY_EXPIRY, String(next24h));
+
+    setDevotion(next);
+    setTimeLeft(24 * 60 * 60 * 1000);
   };
 
   return { devotion, timeLeft };

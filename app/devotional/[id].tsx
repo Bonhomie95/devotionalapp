@@ -10,52 +10,39 @@ import {
   BannerAdSize,
   bannerUnitId,
   loadInterstitial,
-  showInterstitialIfReady,
 } from '@/hooks/useAds';
-import { useBookmarks } from '@/hooks/useBookmarks';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import ViewShot, { captureRef } from 'react-native-view-shot';
+import JournalModal from '../../components/JournalModal';
 
 export default function DevotionDetails() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const devotion = DEVOTIONS.find((d) => d.id === id);
-  const { addBookmark, isBookmarked } = useBookmarks();
   const shotRef = useRef<ViewShot>(null);
+  const [journalVisible, setJournalVisible] = useState(false);
 
-  // Show interstitial
   useEffect(() => {
+    // Only preload — never auto-show the interstitial from a bookmark tap
     loadInterstitial();
-    showInterstitialIfReady();
   }, []);
-
-  // Auto-bookmark
-  useEffect(() => {
-    if (devotion && !isBookmarked(devotion.id)) {
-      addBookmark(devotion);
-    }
-  }, [devotion]);
 
   if (!devotion) return null;
 
   const shareVerse = async () => {
     if (!shotRef.current) return;
-
-    const uri = await captureRef(shotRef, {
-      format: 'png',
-      quality: 1,
-    });
-
-    if (uri) {
-      await Sharing.shareAsync(uri);
-    }
+    const uri = await captureRef(shotRef, { format: 'png', quality: 1 });
+    if (uri) await Sharing.shareAsync(uri);
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 60 }}
+    >
       <Header title="Devotion" />
 
       <VerseBox
@@ -66,7 +53,6 @@ export default function DevotionDetails() {
 
       <DevotionCard title={devotion.title} message={devotion.message} />
 
-      {/* Hidden render for image capture */}
       <View style={{ position: 'absolute', left: -9999 }}>
         <ViewShot ref={shotRef}>
           <ShareVerseCard
@@ -76,8 +62,11 @@ export default function DevotionDetails() {
         </ViewShot>
       </View>
 
+      <ButtonPrimary
+        label="📖 Write Reflection"
+        onPress={() => setJournalVisible(true)}
+      />
       <ButtonPrimary label="Share as Image" onPress={shareVerse} />
-
       <ButtonPrimary
         label="View Bookmarks"
         onPress={() => router.push('/bookmarks')}
@@ -91,7 +80,13 @@ export default function DevotionDetails() {
         unitId={bannerUnitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
       />
-    </View>
+
+      <JournalModal
+        visible={journalVisible}
+        devotionId={devotion.id}
+        onClose={() => setJournalVisible(false)}
+      />
+    </ScrollView>
   );
 }
 
