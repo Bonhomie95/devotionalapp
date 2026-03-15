@@ -8,7 +8,8 @@ const KEY_EXPIRY = 'DEVOTION_EXPIRY';
 const KEY_OVERRIDE = 'OVERRIDE_DEVOTION';
 
 export const useDevotion = () => {
-  const [devotion, setDevotion] = useState<Devotion>(DEVOTIONS[0]);
+  // null = still loading (avoids flashing DEVOTIONS[0] before AsyncStorage resolves)
+  const [devotion, setDevotion] = useState<Devotion | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
   useEffect(() => {
@@ -56,5 +57,5 @@ export const useDevotion = () => {
     setTimeLeft(24 * 60 * 60 * 1000);
   };
 
-  return { devotion, timeLeft };
+  return { devotion, timeLeft, loading: devotion === null };
 };
